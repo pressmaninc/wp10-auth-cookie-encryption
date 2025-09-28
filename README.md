@@ -1,0 +1,1 @@
+# wp10-auth-cookie-encryption
