@@ -159,25 +159,25 @@ define('AUTH_COOKIE_KEY', 'your-secret-encryption-key-here');
 
 ```mermaid
 graph TD
-    A[ユーザーログイン] --> B[wp_set_auth_cookie実行]
+    A[ユーザーログイン] --> B[WordPressコア認証処理]
     B --> C["Cookie生成: username|expiration|token|hmac"]
     C --> D[auth_cookieフィルター実行]
     D --> E[encrypt_auth_cookie呼び出し]
-    E --> F[usernameを暗号化]
+    E --> F[encrypt_username実行]
     F --> G["暗号化Cookie: :encrypted|expiration|token|hmac"]
     G --> H[ブラウザにCookie送信]
     
-    I[認証リクエスト] --> J[wp_parse_auth_cookie実行]
-    J --> K[Cookie分解: 4要素チェック]
+    I[認証リクエスト] --> J[プラガブルwp_parse_auth_cookie実行]
+    J --> K["Cookie分解: 4要素チェック（count !== 4でfalse）"]
     K --> L[wp_parse_auth_cookie_usernameフィルター実行]
     L --> M[decrypt_username_with_cache呼び出し]
     M --> N{"プレフィックス:あり?"}
     N -->|Yes| O{"キャッシュあり?"}
     N -->|No| P[平文usernameをそのまま返却]
-    O -->|Yes| Q[キャッシュから復号済みusername取得]
+    O -->|Yes| Q[キャッシュヒット: 復号済みusername取得]
     O -->|No| R[decrypt_username実行]
-    R --> S[復号化処理]
-    S --> T[キャッシュに保存]
+    R --> S["復号化処理（Sodium）"]
+    S --> T[static配列にキャッシュ保存]
     T --> U[復号済みusernameを返却]
     Q --> U
     P --> V[認証処理続行]
