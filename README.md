@@ -29,9 +29,23 @@ define('AUTH_COOKIE_KEY', 'your-secret-encryption-key-here');
 
 プラグインを初めて有効化する際は、全ユーザーの強制再ログインが必要です。
 
-### 方法: 認証キーの更新
+### 推奨方法: セッショントークンの削除
 
-`wp-config.php` の認証キーをすべて新しい値に変更してください：
+データベースから全ユーザーのセッション情報を削除してください：
+
+```sql
+DELETE FROM wp_usermeta WHERE meta_key = 'session_tokens';
+```
+
+または、WP-CLIを使用する場合：
+
+```bash
+wp user meta delete --all --key=session_tokens
+```
+
+### 代替方法: 認証キーの更新
+
+上記の方法が使用できない場合は、`wp-config.php` の認証キーを変更することでも強制ログアウトできます：
 
 ```php
 define( 'AUTH_KEY',         '新しいランダムな文字列' );
@@ -45,6 +59,8 @@ define( 'NONCE_SALT',       '新しいランダムな文字列' );
 ```
 
 新しいキーは [WordPress.org Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/) で生成できます。
+
+**注意**: 認証キー変更はパスワードリセットを要求する場合があるため、セッショントークン削除を推奨します。
 
 ## 技術仕様
 
